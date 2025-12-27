@@ -1,7 +1,10 @@
+import {Title} from "@/components/shared/title";
+import {Container} from "@/components/shared/container";
+
 export default function Home() {
-  return (<div>
-    <h1 className="text-3xl font-bold underline">
-      Hello, Next.js!
-    </h1>
-  </div>)
+  return <>
+    <Container className="mt-10">
+      <Title size="lg" text="Pizza Types" className='font-bold'/>
+    </Container>
+  </>
 }
