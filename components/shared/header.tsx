@@ -15,7 +15,7 @@ type PropsType = {
 export const Header: React.FC<PropsType> = ({className}) => {
     return (
         <header className={cn('border border-b-gray-100', className)}>
-            <Container className={cn('flex items-center gap-3 py-8 px-12')}>
+            <Container className={cn('flex items-center gap-3 py-8 px-6')}>
                 <Image src='/logo.png' width={35} height={35} alt="Logo"/>
                 <div>
                     <h1 className={'text-2xl uppercase font-black'}>PizzaHut</h1>

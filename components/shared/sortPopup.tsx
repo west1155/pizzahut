@@ -8,10 +8,10 @@ type PropType = {
 export const SortPopup: React.FC<PropType> = ({className}) => {
     return (
         <div
-            className={cn('inline-flex items-center gap-1 bg-gray-50 px-5 h-13 rounded-2xl cursor-pointer text-xs', className)}>
+            className={cn('flex items-center gap-1 font-medium h-11 rounded-2xl px-5 transition-all duration-200', className)}>
             <ArrowUpDown className="w-4 h-4"/>
             <b >Sort by:</b>
-            <b className={'text-primary'}>popular</b>
+            <b className={'text-orange-500'}>popular</b>
         </div>
     )
 
