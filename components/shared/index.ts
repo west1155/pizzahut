@@ -7,3 +7,5 @@ export * from "./topBar";
 export * from "./sortPopup";
 export * from "./checkbox-filter-group";
 export * from "./filter-checkbox";
+export * from "./product-card";
+export * from "./products-list-group";
