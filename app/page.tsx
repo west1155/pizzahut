@@ -6,6 +6,7 @@ import {Container} from "@/components/shared/container";
 import {TopBar} from "@/components/shared/topBar";
 import {Filters} from "@/components/shared/filters";
 import {ProductsListGroup} from "@/components/shared";
+import ScrollToTopButton from "@/components/ui/scroll_up_button";
 
 export default function Home() {
 
@@ -17,6 +18,7 @@ export default function Home() {
         {id: 5, name: 'sushity', price: 30, imgURL: "/images/pizzas/pizza_saus1.webp"},
     ];
     return <>
+        <ScrollToTopButton />
         <Container className="mt-10">
             <Title size="lg" text="Menu:" className='font-bold'/>
 
