@@ -4,7 +4,7 @@ import Image from "next/image";
 import {ArrowRight, ShoppingCart, User} from "lucide-react";
 import {Container} from "./container";
 import {Button} from "../ui/button";
-import {SearchBar} from "./search-bar";
+import {SearchInput} from "./search-bar";
 
 
 type PropsType = {
@@ -21,7 +21,7 @@ export const Header: React.FC<PropsType> = ({className}) => {
                     <h1 className={'text-2xl uppercase font-black'}>PizzaHut</h1>
                     <p className={'text-sm text-gray-400 leading-3'}>Order your favourite pizza</p>
                 </div>
-                <SearchBar className={'flex-1 mx-3'} />
+                <SearchInput className={'flex-1 mx-3'} />
                 <Button variant={'outline'} className={'flex items-center gap-1'}>
                     <User size={16}/>
                     Sign In
