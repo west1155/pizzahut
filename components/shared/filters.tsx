@@ -1,35 +1,45 @@
 'use client';
 
 
-import {Title} from "@/components/shared/title";
+import { Title } from "@/components/shared/title";
 import React from "react";
-import {CheckboxFilterGroup} from "@/components/shared/checkbox-filter-group";
-import {Input, RangeSlider} from "@/components/ui";
-import {useSearchParams} from 'next/navigation';
-import {useMap, useSet} from "react-use";
+import { CheckboxFilterGroup } from "@/components/shared/checkbox-filter-group";
+import { Input, RangeSlider } from "@/components/ui";
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useMap, useSet } from "react-use";
 
 type PropsType = {
     className?: string;
 }
 
-export const Filters: React.FC<PropsType> = ({className}) => {
-
+export const Filters: React.FC<PropsType> = ({ className }) => {
+    const router = useRouter();
     const searchParams = useSearchParams();
-    const [filters, {set}] = useMap(Object.fromEntries(searchParams.entries()));
+    const [filters, { set }] = useMap(Object.fromEntries(searchParams.entries()));
     const [selectedIngredients, { toggle }] = useSet(new Set<string>([]));
+
+    React.useEffect(() => {
+        const query = new URLSearchParams(filters);
+        if (selectedIngredients.size > 0) {
+            query.set('ingredients', Array.from(selectedIngredients).join(','));
+        } else {
+            query.delete('ingredients');
+        }
+        router.push(`?${query.toString()}`, { scroll: false });
+    }, [filters, selectedIngredients, router]);
 
     React.useEffect(() => {
         console.log('Selected ingredients:', selectedIngredients);
     }, [selectedIngredients]);
 
     const ingredients = [
-        {id: 1, name: 'Cheese'},
-        {id: 2, name: 'Tomato'},
-        {id: 3, name: 'Basil'},
-        {id: 4, name: 'Mushrooms'},
-        {id: 5, name: 'Pepperoni'},
-        {id: 6, name: 'Olives'},
-        {id: 7, name: 'Onions'},
+        { id: 1, name: 'Cheese' },
+        { id: 2, name: 'Tomato' },
+        { id: 3, name: 'Basil' },
+        { id: 4, name: 'Mushrooms' },
+        { id: 5, name: 'Pepperoni' },
+        { id: 6, name: 'Olives' },
+        { id: 7, name: 'Onions' },
     ];
 
     const priceFrom = Number(filters.priceFrom) || 0;
@@ -53,8 +63,8 @@ export const Filters: React.FC<PropsType> = ({className}) => {
             onClickCheckbox={() => {
             }}
             items={[
-                {text: 'Slim', value: '1'},
-                {text: 'Traditional', value: '2'},
+                { text: 'Slim', value: '1' },
+                { text: 'Traditional', value: '2' },
             ]}
         />
 
@@ -65,9 +75,9 @@ export const Filters: React.FC<PropsType> = ({className}) => {
             onClickCheckbox={() => {
             }}
             items={[
-                {text: '20 cm', value: '20'},
-                {text: '30 cm', value: '30'},
-                {text: '40 cm', value: '40'},
+                { text: '20 cm', value: '20' },
+                { text: '30 cm', value: '30' },
+                { text: '40 cm', value: '40' },
             ]}
         />
 
