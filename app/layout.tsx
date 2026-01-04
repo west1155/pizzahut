@@ -1,7 +1,7 @@
 import React from 'react';
 import './globals.css';
 import { Nunito } from 'next/font/google';
-import {Header} from "@/components/shared/header";
+import { Header } from "@/components/shared/header";
 
 const nunito = Nunito({
     subsets: ['cyrillic'],
@@ -10,22 +10,22 @@ const nunito = Nunito({
 });
 
 export default function RootLayout({
-                                       children,
-                                   }: Readonly<{
+    children,
+}: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
         <html className={nunito.variable} lang="en">
-        <head>
-            <link data-rh="true" rel="icon" href="/public/logo.png" />
-            <title></title>
-        </head>
-        <body>
-        <main>
-            <Header />
-            {children}
-        </main>
-        </body>
+            <head>
+                <link data-rh="true" rel="icon" href="/logo.png" />
+                <title></title>
+            </head>
+            <body>
+                <main>
+                    <Header />
+                    {children}
+                </main>
+            </body>
         </html>
     );
 }
