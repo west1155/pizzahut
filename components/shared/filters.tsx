@@ -17,6 +17,8 @@ export const Filters: React.FC<PropsType> = ({ className }) => {
     const searchParams = useSearchParams();
     const [filters, { set }] = useMap(Object.fromEntries(searchParams.entries()));
     const [selectedIngredients, { toggle }] = useSet(new Set<string>([]));
+    const [selectedPizzaTypes, { toggle: togglePizzaTypes }] = useSet(new Set<string>([]));
+    const [selectedSizes, { toggle: toggleSizes }] = useSet(new Set<string>([]));
 
     React.useEffect(() => {
         const query = new URLSearchParams(filters);
@@ -25,8 +27,21 @@ export const Filters: React.FC<PropsType> = ({ className }) => {
         } else {
             query.delete('ingredients');
         }
+
+        if (selectedPizzaTypes.size > 0) {
+            query.set('pizzaTypes', Array.from(selectedPizzaTypes).join(','));
+        } else {
+            query.delete('pizzaTypes');
+        }
+
+        if (selectedSizes.size > 0) {
+            query.set('sizes', Array.from(selectedSizes).join(','));
+        } else {
+            query.delete('sizes');
+        }
+
         router.push(`?${query.toString()}`, { scroll: false });
-    }, [filters, selectedIngredients, router]);
+    }, [filters, selectedIngredients, selectedPizzaTypes, selectedSizes, router]);
 
     React.useEffect(() => {
         console.log('Selected ingredients:', selectedIngredients);
@@ -60,8 +75,8 @@ export const Filters: React.FC<PropsType> = ({ className }) => {
             name="pizzaTypes"
             className="mb-5"
             title="Pizza types"
-            onClickCheckbox={() => {
-            }}
+            onClickCheckbox={togglePizzaTypes}
+            selectedIds={selectedPizzaTypes}
             items={[
                 { text: 'Slim', value: '1' },
                 { text: 'Traditional', value: '2' },
@@ -72,8 +87,8 @@ export const Filters: React.FC<PropsType> = ({ className }) => {
             name="sizes"
             className="mb-5"
             title="Sizes"
-            onClickCheckbox={() => {
-            }}
+            onClickCheckbox={toggleSizes}
+            selectedIds={selectedSizes}
             items={[
                 { text: '20 cm', value: '20' },
                 { text: '30 cm', value: '30' },

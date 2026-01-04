@@ -8,8 +8,8 @@ import { ProductsListGroup } from "@/components/shared";
 import ScrollToTopButton from "@/components/ui/scroll_up_button";
 import { prisma } from "@/prisma/prisma-client";
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ priceFrom?: string, priceTo?: string, ingredients?: string }> }) {
-    const { priceFrom, priceTo, ingredients: selectedIngredients } = await searchParams;
+export default async function Home({ searchParams }: { searchParams: Promise<{ priceFrom?: string, priceTo?: string, ingredients?: string, pizzaTypes?: string, sizes?: string }> }) {
+    const { priceFrom, priceTo, ingredients: selectedIngredients, pizzaTypes, sizes } = await searchParams;
 
     const categories = await prisma.category.findMany({
         include: {
@@ -20,7 +20,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                             price: {
                                 gte: Number(priceFrom) || 0,
                                 lte: Number(priceTo) || 1000,
-                            }
+                            },
+                            ...(pizzaTypes ? {
+                                pizzaType: {
+                                    in: pizzaTypes.split(',').map(Number)
+                                }
+                            } : {}),
+                            ...(sizes ? {
+                                size: {
+                                    in: sizes.split(',').map(Number)
+                                }
+                            } : {})
                         }
                     },
                     ...(selectedIngredients ? {
