@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 import { ChooseProductModal } from './modals/choose-product-modal';
 
-import { ProductItem } from "@prisma/client";
+import { Ingredient, ProductItem } from "@prisma/client";
 
 export type ProductType = {
     id: number;
@@ -19,9 +19,10 @@ export type ProductType = {
     className?: string;
     items?: ProductItem[];
     categoryName?: string;
+    ingredients?: Ingredient[];
 }
 
-export const ProductCard: React.FC<ProductType> = ({ id, name, price, imgURL, items, categoryName, className }) => {
+export const ProductCard: React.FC<ProductType> = ({ id, name, price, imgURL, items, categoryName, ingredients, className }) => {
     const [openModal, setOpenModal] = React.useState(false);
 
     return (
@@ -64,7 +65,7 @@ export const ProductCard: React.FC<ProductType> = ({ id, name, price, imgURL, it
             </div>
 
             <ChooseProductModal
-                product={{ id, name, imgURL, items, categoryName }}
+                product={{ id, name, imgURL, items, categoryName, ingredients }}
                 open={openModal}
                 onOpenChange={setOpenModal}
             />

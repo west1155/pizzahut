@@ -6,8 +6,11 @@ import { Title } from '@/components/shared/title';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { GroupVariants } from '@/components/shared/group-variants';
+import { PizzaImage } from '@/components/shared/pizza-image';
 
-import { ProductItem } from '@prisma/client';
+import { Ingredient, ProductItem } from '@prisma/client';
+import { IngredientItem } from '@/components/shared/ingredient-item';
+import { useSet } from 'react-use';
 
 interface Props {
     product: {
@@ -16,6 +19,7 @@ interface Props {
         imgURL: string;
         items?: ProductItem[];
         categoryName?: string;
+        ingredients?: Ingredient[];
     };
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -25,6 +29,7 @@ interface Props {
 export const ChooseProductModal: React.FC<Props> = ({ product, open, onOpenChange, className }) => {
     const [size, setSize] = React.useState<string>('20');
     const [dough, setDough] = React.useState<string>('1');
+    const [selectedIngredients, { toggle: toggleIngredient }] = useSet(new Set<number>([]));
 
     const availableSizes = [
         { name: '20 cm', value: '20', disabled: !product.items?.some(i => i.size === 20) },
@@ -49,7 +54,12 @@ export const ChooseProductModal: React.FC<Props> = ({ product, open, onOpenChang
         }
     }, [size, dough, product.items]);
 
-    const price = currentItem ? currentItem.price : (product.items?.[0]?.price || 0);
+    const basePrice = currentItem ? currentItem.price : (product.items?.[0]?.price || 0);
+    const ingredientsPrice = product.ingredients
+        ?.filter(i => selectedIngredients.has(i.id))
+        .reduce((sum, i) => sum + i.price, 0) || 0;
+
+    const totalPrice = basePrice + ingredientsPrice;
     const doughText = dough === '1' ? 'traditional dough' : 'thin dough';
 
     return (
@@ -58,25 +68,22 @@ export const ChooseProductModal: React.FC<Props> = ({ product, open, onOpenChang
                 <div className="flex flex-1">
                     {/* Left side - Image */}
                     <div className="flex items-center justify-center flex-1 relative bg-[#FEF3E2] p-10">
-                        <Image
-                            src={product.imgURL}
-                            alt={product.name}
-                            width={size === '20' ? 300 : size === '30' ? 350 : 400}
-                            height={size === '20' ? 300 : size === '30' ? 350 : 400}
-                            className="object-contain relative left-2 top-2 transition-all duration-300 z-10"
+                        <PizzaImage
+                            imageUrl={product.imgURL}
+                            size={Number(size) as 20 | 30 | 40}
                         />
                     </div>
 
                     {/* Right side - Details */}
-                    <div className="w-[490px] p-7 bg-[#f7f6f5] flex flex-col justify-between">
-                        <div>
+                    <div className="w-[490px] p-7 bg-[#f7f6f5] flex flex-col">
+                        <div className="flex-1 overflow-auto pr-2">
                             <Title text={product.name} size="md" className="font-extrabold mb-1" />
-                            <p className="text-gray-400">
+                            <p className="text-gray-400 mb-5">
                                 {product.categoryName === 'Pizza' ? `${size} cm, ${doughText}` : ''}
                             </p>
 
                             {product.categoryName === 'Pizza' && (
-                                <div className="flex flex-col gap-4 mt-5">
+                                <div className="flex flex-col gap-4">
                                     <GroupVariants
                                         items={availableSizes}
                                         value={size}
@@ -90,11 +97,29 @@ export const ChooseProductModal: React.FC<Props> = ({ product, open, onOpenChang
                                     />
                                 </div>
                             )}
+
+                            {product.categoryName === 'Pizza' && product.ingredients && (
+                                <>
+                                    <Title text="Add ingredients" size="sm" className="font-bold mb-3 mt-8" />
+                                    <div className="grid grid-cols-4 gap-3">
+                                        {product.ingredients.map((ingredient) => (
+                                            <IngredientItem
+                                                key={ingredient.id}
+                                                name={ingredient.name}
+                                                price={ingredient.price}
+                                                imageUrl={ingredient.imageUrl}
+                                                active={selectedIngredients.has(ingredient.id)}
+                                                onClick={() => toggleIngredient(ingredient.id)}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
+                            )}
                         </div>
 
-                        <div className="mt-auto">
-                            <button className="h-[55px] px-10 text-base rounded-[18px] w-full mt-10 bg-orange-500 hover:bg-orange-600 text-white font-bold transition-all">
-                                Add to cart for {price} £
+                        <div className="mt-5">
+                            <button className="h-[55px] px-10 text-base rounded-[18px] w-full bg-orange-500 hover:bg-orange-600 text-white font-bold transition-all">
+                                Add to cart for {totalPrice.toFixed(1)} £
                             </button>
                         </div>
                     </div>
