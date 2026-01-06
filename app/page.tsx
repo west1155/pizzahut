@@ -75,7 +75,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                                 id: p.id,
                                 name: p.name,
                                 price: p.items[0]?.price || 0,
-                                imgURL: p.imageUrl
+                                imgURL: p.imageUrl,
+                                items: p.items,
+                                categoryName: category.name
                             }))}
                             categoryId={category.id}
                         />

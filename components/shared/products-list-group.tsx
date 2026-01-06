@@ -37,10 +37,7 @@ export const ProductsListGroup: React.FC<PropsType> = ({ className, title, produ
                     .map((product, index) => (
                         <ProductCard
                             key={index}
-                            id={product.id}
-                            name={product.name}
-                            price={product.price}
-                            imgURL={product.imgURL}
+                            {...product}
                         />))}
             </div>
 
