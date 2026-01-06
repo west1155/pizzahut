@@ -71,6 +71,7 @@ export const ChooseProductModal: React.FC<Props> = ({ product, open, onOpenChang
                         <PizzaImage
                             imageUrl={product.imgURL}
                             size={Number(size) as 20 | 30 | 40}
+                            isPizza={product.categoryName === 'Pizza'}
                         />
                     </div>
 

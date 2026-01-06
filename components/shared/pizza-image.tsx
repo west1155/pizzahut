@@ -7,10 +7,11 @@ import Image from 'next/image';
 interface Props {
     imageUrl: string;
     size: 20 | 30 | 40;
+    isPizza?: boolean;
     className?: string;
 }
 
-export const PizzaImage: React.FC<Props> = ({ imageUrl, size, className }) => {
+export const PizzaImage: React.FC<Props> = ({ imageUrl, size, isPizza, className }) => {
     return (
         <div className={cn('flex items-center justify-center flex-1 relative w-full h-full', className)}>
             {/* The Pizza Image - Scaled dynamically */}
@@ -29,11 +30,15 @@ export const PizzaImage: React.FC<Props> = ({ imageUrl, size, className }) => {
                 )}
             />
 
-            {/* 40cm Size Guide */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-dashed border-2 rounded-full border-gray-300 w-[370px] h-[370px]" />
+            {isPizza && (
+                <>
+                    {/* 40cm Size Guide */}
+                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-dashed border-2 rounded-full border-gray-300 w-[370px] h-[370px]" />
 
-            {/* 30cm Size Guide */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-dotted border-2 rounded-full border-gray-300 w-[327px] h-[327px]" />
+                    {/* 30cm Size Guide */}
+                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-dotted border-2 rounded-full border-gray-300 w-[327px] h-[327px]" />
+                </>
+            )}
         </div>
     );
 };
