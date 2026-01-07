@@ -26,10 +26,15 @@ interface Props {
     className?: string;
 }
 
+import { useCartStore } from '@/components/store/cart';
+import { useShallow } from 'zustand/react/shallow';
+
 export const ChooseProductModal: React.FC<Props> = ({ product, open, onOpenChange, className }) => {
     const [size, setSize] = React.useState<string>('20');
     const [dough, setDough] = React.useState<string>('1');
     const [selectedIngredients, { toggle: toggleIngredient }] = useSet(new Set<number>([]));
+
+    const [addCartItem, addingItem] = useCartStore(useShallow((state) => [state.addCartItem, state.addingItem]));
 
     const availableSizes = [
         { name: '20 cm', value: '20', disabled: !product.items?.some(i => i.size === 20) },
@@ -61,6 +66,22 @@ export const ChooseProductModal: React.FC<Props> = ({ product, open, onOpenChang
 
     const totalPrice = basePrice + ingredientsPrice;
     const doughText = dough === '1' ? 'traditional dough' : 'thin dough';
+
+    const handleClickAdd = async () => {
+        try {
+            const productItemId = currentItem?.id || product.items?.[0]?.id;
+
+            if (productItemId) {
+                await addCartItem({
+                    productItemId,
+                    ingredients: Array.from(selectedIngredients),
+                });
+                onOpenChange(false);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -119,8 +140,14 @@ export const ChooseProductModal: React.FC<Props> = ({ product, open, onOpenChang
                         </div>
 
                         <div className="mt-5">
-                            <button className="h-[55px] px-10 text-base rounded-[18px] w-full bg-orange-500 hover:bg-orange-600 text-white font-bold transition-all">
-                                Add to cart for {totalPrice.toFixed(1)} £
+                            <button
+                                disabled={addingItem}
+                                onClick={handleClickAdd}
+                                className={cn(
+                                    "h-[55px] px-10 text-base rounded-[18px] w-full bg-orange-500 hover:bg-orange-600 text-white font-bold transition-all",
+                                    addingItem && "opacity-50 cursor-not-allowed"
+                                )}>
+                                {addingItem ? 'Adding...' : `Add to cart for ${totalPrice.toFixed(1)} £`}
                             </button>
                         </div>
                     </div>
