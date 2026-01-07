@@ -52,26 +52,26 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        const findCartItem = await prisma.cartItem.findFirst({
+        const cartItems = await prisma.cartItem.findMany({
             where: {
                 cartId: userCart.id,
                 productItemId: Number(productItemId),
-                ingredients: {
-                    every: {
-                        id: { in: ingredients || [] },
-                    },
-                    some: {}, // Ensures it has at least one if we specified any
-                },
             },
             include: {
                 ingredients: true
             }
         });
 
-        // Simplified logic: If exact ingredients match (or both have none), update quantity.
-        // For a more robust app, we'd check if length and IDs match exactly.
+        // Find an item that has EXACTLY the same ingredients
+        const findCartItem = cartItems.find((item) => {
+            const itemIngredientIds = item.ingredients.map((i) => i.id).sort((a: number, b: number) => a - b);
+            const inputIngredientIds = (ingredients || []).map((id: any) => Number(id)).sort((a: number, b: number) => a - b);
 
-        if (findCartItem && findCartItem.ingredients.length === (ingredients?.length || 0)) {
+            return itemIngredientIds.length === inputIngredientIds.length &&
+                itemIngredientIds.every((id, index) => id === inputIngredientIds[index]);
+        });
+
+        if (findCartItem) {
             await prisma.cartItem.update({
                 where: { id: findCartItem.id },
                 data: { quantity: findCartItem.quantity + quantity },
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
                     productItemId: Number(productItemId),
                     quantity,
                     ingredients: {
-                        connect: ingredients?.map((id: number) => ({ id })) || [],
+                        connect: ingredients?.map((id: number) => ({ id: Number(id) })) || [],
                     },
                 },
             });

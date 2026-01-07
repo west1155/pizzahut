@@ -33,6 +33,7 @@ interface CartState {
     /* Actions */
     fetchCart: () => Promise<void>;
     addCartItem: (values: any) => Promise<void>;
+    removeCartItem: (id: number) => Promise<void>;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -96,6 +97,30 @@ export const useCartStore = create<CartState>((set, get) => ({
         } catch (error) {
             console.error('[ADD_CART_ITEM] Error:', error);
             set({ error: true, addingItem: false });
+        }
+    },
+
+    removeCartItem: async (id: number) => {
+        try {
+            set({ loading: true, error: false });
+            const response = await fetch(`/api/cart-items/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to remove item from cart');
+            }
+
+            const data = await response.json();
+
+            set({
+                items: data.items || [],
+                totalAmount: data.totalAmount || 0,
+                loading: false
+            });
+        } catch (error) {
+            console.error('[REMOVE_CART_ITEM] Error:', error);
+            set({ error: true, loading: false });
         }
     },
 }));

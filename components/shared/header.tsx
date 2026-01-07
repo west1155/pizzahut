@@ -27,9 +27,7 @@ export const Header: React.FC<PropsType> = ({ className }) => {
                     <User size={16} />
                     Sign In
                 </Button>
-
                 <CartButton />
-
             </Container>
 
 
