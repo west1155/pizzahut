@@ -17,7 +17,12 @@ export async function GET(req: NextRequest) {
                     include: {
                         productItem: {
                             include: {
-                                product: true
+                                product: {
+                                    include: {
+                                        items: true,
+                                        ingredients: true,
+                                    }
+                                }
                             }
                         },
                         ingredients: true,
@@ -97,7 +102,12 @@ export async function POST(req: NextRequest) {
                     include: {
                         productItem: {
                             include: {
-                                product: true
+                                product: {
+                                    include: {
+                                        items: true,
+                                        ingredients: true,
+                                    }
+                                }
                             }
                         },
                         ingredients: true,

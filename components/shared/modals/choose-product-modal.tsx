@@ -17,24 +17,51 @@ interface Props {
         id: number;
         name: string;
         imgURL: string;
-        items?: ProductItem[];
+        items?: any[]; // Using any or a more relaxed type to avoid Prisma strictness
         categoryName?: string;
-        ingredients?: Ingredient[];
+        ingredients?: any[];
     };
     open: boolean;
     onOpenChange: (open: boolean) => void;
     className?: string;
+    selectedIngredientsIds?: number[];
+    initialSize?: number;
+    initialDough?: number;
+    initialPrice?: number;
+    onUpdate?: (values: { productItemId: number; ingredients: number[] }) => Promise<void>;
 }
 
 import { useCartStore } from '@/components/store/cart';
 import { useShallow } from 'zustand/react/shallow';
 
-export const ChooseProductModal: React.FC<Props> = ({ product, open, onOpenChange, className }) => {
-    const [size, setSize] = React.useState<string>('20');
-    const [dough, setDough] = React.useState<string>('1');
-    const [selectedIngredients, { toggle: toggleIngredient }] = useSet(new Set<number>([]));
+export const ChooseProductModal: React.FC<Props> = ({
+    product,
+    open,
+    onOpenChange,
+    className,
+    selectedIngredientsIds = [],
+    initialSize,
+    initialDough,
+    initialPrice,
+    onUpdate
+}) => {
+    const [size, setSize] = React.useState<string>(String(initialSize || '20'));
+    const [dough, setDough] = React.useState<string>(String(initialDough || '1'));
+    const [selectedIngredients, { toggle: toggleIngredient }] = useSet(new Set<number>(selectedIngredientsIds));
 
     const [addCartItem, addingItem] = useCartStore(useShallow((state) => [state.addCartItem, state.addingItem]));
+
+    // Initialize or reset state only when the modal is opened
+    React.useEffect(() => {
+        if (open) {
+            setSize(String(initialSize || '20'));
+            setDough(String(initialDough || '1'));
+            // Reset ingredients to prop values
+            selectedIngredients.clear();
+            selectedIngredientsIds.forEach(id => selectedIngredients.add(id));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
 
     const availableSizes = [
         { name: '20 cm', value: '20', disabled: !product.items?.some(i => i.size === 20) },
@@ -72,10 +99,17 @@ export const ChooseProductModal: React.FC<Props> = ({ product, open, onOpenChang
             const productItemId = currentItem?.id || product.items?.[0]?.id;
 
             if (productItemId) {
-                await addCartItem({
-                    productItemId,
-                    ingredients: Array.from(selectedIngredients),
-                });
+                if (onUpdate) {
+                    await onUpdate({
+                        productItemId,
+                        ingredients: Array.from(selectedIngredients),
+                    });
+                } else {
+                    await addCartItem({
+                        productItemId,
+                        ingredients: Array.from(selectedIngredients),
+                    });
+                }
                 onOpenChange(false);
             }
         } catch (error) {
@@ -147,7 +181,8 @@ export const ChooseProductModal: React.FC<Props> = ({ product, open, onOpenChang
                                     "h-[55px] px-10 text-base rounded-[18px] w-full bg-orange-500 hover:bg-orange-600 text-white font-bold transition-all",
                                     addingItem && "opacity-50 cursor-not-allowed"
                                 )}>
-                                {addingItem ? 'Adding...' : `Add to cart for ${totalPrice.toFixed(1)} £`}
+                                {addingItem ? (onUpdate ? 'Updating...' : 'Adding...') :
+                                    (onUpdate ? `Update for ${Math.max(0, totalPrice - (initialPrice || 0)).toFixed(1)} £` : `Add to cart for ${totalPrice.toFixed(1)} £`)}
                             </button>
                         </div>
                     </div>

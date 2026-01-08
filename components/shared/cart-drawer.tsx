@@ -7,8 +7,10 @@ import { Title } from '@/components/shared/title';
 import { ShoppingCart, ArrowRight, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { useCartStore } from '../store/cart';
+import { useCartStore, CartItemDTO } from '../store/cart';
 import { useShallow } from 'zustand/react/shallow';
+import { ChooseProductModal } from './modals/choose-product-modal';
+import { useSet } from 'react-use';
 
 interface Props {
     children: React.ReactNode;
@@ -17,9 +19,11 @@ interface Props {
 
 
 export const CartDrawer: React.FC<Props> = ({ children }) => {
-    const [items, totalAmount, removeCartItem, loading] = useCartStore(
-        useShallow((state) => [state.items, state.totalAmount, state.removeCartItem, state.loading])
+    const [items, totalAmount, removeCartItem, updateCartItem, loading] = useCartStore(
+        useShallow((state) => [state.items, state.totalAmount, state.removeCartItem, state.updateCartItem, state.loading])
     );
+
+    const [editingItem, setEditingItem] = React.useState<CartItemDTO | null>(null);
     return (
         <Drawer.Root direction="right">
             <Drawer.Trigger asChild>
@@ -55,24 +59,31 @@ export const CartDrawer: React.FC<Props> = ({ children }) => {
 
                                     return (
                                         <div key={item.id} className="flex items-center gap-4 py-4 border-b border-gray-100 last:border-0 relative group">
-                                            <div className="w-16 h-16 flex-shrink-0">
-                                                <img
-                                                    src={item.productItem.product.imageUrl}
-                                                    alt={item.productItem.product.name}
-                                                    className="w-full h-full object-contain"
-                                                />
-                                            </div>
-                                            <div className="flex-1 pr-6">
-                                                <h4 className="font-bold text-sm leading-tight">{item.productItem.product.name}</h4>
-                                                {details && <p className="text-xs text-gray-400">{details}</p>}
-                                                {item.ingredients.length > 0 && (
-                                                    <p className="text-[10px] text-gray-300">
-                                                        + {item.ingredients.map(i => i.name).join(', ')}
-                                                    </p>
-                                                )}
-                                                <div className="flex items-center justify-between mt-2">
-                                                    <span className="text-sm font-bold">{item.productItem.price} £</span>
-                                                    <span className="text-xs text-gray-400">x {item.quantity}</span>
+                                            <div
+                                                className="flex flex-1 items-center gap-4 cursor-pointer"
+                                                onClick={() => setEditingItem(item)}
+                                            >
+                                                <div className="w-16 h-16 flex-shrink-0">
+                                                    <img
+                                                        src={item.productItem.product.imageUrl}
+                                                        alt={item.productItem.product.name}
+                                                        className="w-full h-full object-contain"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 pr-6">
+                                                    <h4 className="font-bold text-sm leading-tight">{item.productItem.product.name}</h4>
+                                                    {details && <p className="mt-1 text-xs text-gray-500">{details}</p>}
+                                                    {item.ingredients.length > 0 && (
+                                                        <p className="mt-1 text-[12px] text-gray-400">
+                                                            + {item.ingredients.map(i => i.name).join(', ')}
+                                                        </p>
+                                                    )}
+                                                    <div className="flex items-center justify-between mt-1">
+                                                        <span className="text-sm font-bold">
+                                                            {item.productItem.price + (item.ingredients?.reduce((acc, ing) => acc + ing.price, 0) || 0)} £
+                                                        </span>
+                                                        <span className="text-xs text-gray-400">x {item.quantity}</span>
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -108,6 +119,26 @@ export const CartDrawer: React.FC<Props> = ({ children }) => {
                     </div>
                 </Drawer.Content>
             </Drawer.Portal>
+
+            {editingItem && (
+                <ChooseProductModal
+                    product={{
+                        id: editingItem.productItem.product.id,
+                        name: editingItem.productItem.product.name,
+                        imgURL: editingItem.productItem.product.imageUrl,
+                        items: editingItem.productItem.product.items,
+                        ingredients: editingItem.productItem.product.ingredients,
+                        categoryName: 'Pizza' // Assuming we only edit pizzas for now or it's safe
+                    }}
+                    open={!!editingItem}
+                    onOpenChange={() => setEditingItem(null)}
+                    selectedIngredientsIds={editingItem.ingredients.map(i => i.id)}
+                    initialSize={editingItem.productItem.size || 20}
+                    initialDough={editingItem.productItem.pizzaType || 1}
+                    initialPrice={editingItem.productItem.price + (editingItem.ingredients?.reduce((acc, ing) => acc + ing.price, 0) || 0)}
+                    onUpdate={(values) => updateCartItem(editingItem.id, values)}
+                />
+            )}
         </Drawer.Root>
     );
 };

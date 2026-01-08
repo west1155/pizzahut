@@ -13,6 +13,18 @@ export interface CartItemDTO {
             id: number;
             name: string;
             imageUrl: string;
+            items: {
+                id: number;
+                price: number;
+                size: number | null;
+                pizzaType: number | null;
+            }[];
+            ingredients: {
+                id: number;
+                name: string;
+                price: number;
+                imageUrl: string;
+            }[];
         };
     };
     ingredients: {
@@ -34,6 +46,7 @@ interface CartState {
     fetchCart: () => Promise<void>;
     addCartItem: (values: any) => Promise<void>;
     removeCartItem: (id: number) => Promise<void>;
+    updateCartItem: (id: number, values: { productItemId: number; ingredients: number[] }) => Promise<void>;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -120,6 +133,32 @@ export const useCartStore = create<CartState>((set, get) => ({
             });
         } catch (error) {
             console.error('[REMOVE_CART_ITEM] Error:', error);
+            set({ error: true, loading: false });
+        }
+    },
+
+    updateCartItem: async (id: number, values: { productItemId: number; ingredients: number[] }) => {
+        try {
+            set({ loading: true, error: false });
+            const response = await fetch(`/api/cart-items/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(values),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update cart item');
+            }
+
+            const data = await response.json();
+
+            set({
+                items: data.items || [],
+                totalAmount: data.totalAmount || 0,
+                loading: false
+            });
+        } catch (error) {
+            console.error('[UPDATE_CART_ITEM] Error:', error);
             set({ error: true, loading: false });
         }
     },
