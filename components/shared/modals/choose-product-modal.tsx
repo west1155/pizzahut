@@ -11,6 +11,7 @@ import { PizzaImage } from '@/components/shared/pizza-image';
 import { Ingredient, ProductItem } from '@prisma/client';
 import { IngredientItem } from '@/components/shared/ingredient-item';
 import { useSet } from 'react-use';
+import toast from 'react-hot-toast';
 
 interface Props {
     product: {
@@ -94,6 +95,7 @@ export const ChooseProductModal: React.FC<Props> = ({
     const totalPrice = basePrice + ingredientsPrice;
     const doughText = dough === '1' ? 'traditional dough' : 'thin dough';
 
+
     const handleClickAdd = async () => {
         try {
             const productItemId = currentItem?.id || product.items?.[0]?.id;
@@ -104,15 +106,19 @@ export const ChooseProductModal: React.FC<Props> = ({
                         productItemId,
                         ingredients: Array.from(selectedIngredients),
                     });
+                    toast.success('Product updated successfully!');
                 } else {
                     await addCartItem({
                         productItemId,
                         ingredients: Array.from(selectedIngredients),
                     });
+                    toast.success('Product added to cart!');
                 }
                 onOpenChange(false);
             }
         } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to update product';
+            toast.error(message);
             console.error(error);
         }
     };

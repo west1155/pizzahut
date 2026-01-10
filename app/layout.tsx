@@ -9,6 +9,8 @@ const nunito = Nunito({
     weight: ['400', '500', '600', '700', '800', '900'],
 });
 
+import { Toaster } from 'react-hot-toast';
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -25,6 +27,7 @@ export default function RootLayout({
                     <Header />
                     {children}
                 </main>
+                <Toaster />
             </body>
         </html>
     );
