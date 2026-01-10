@@ -8,12 +8,13 @@ import { SearchInput } from "./search-bar";
 import { CartButton } from "./cartButton";
 
 
-type PropsType = {
+interface Props {
+    hasSearch?: boolean;
+    hasCart?: boolean;
     className?: string;
 }
 
-
-export const Header: React.FC<PropsType> = ({ className }) => {
+export const Header: React.FC<Props> = ({ className, hasSearch = true, hasCart = true }) => {
     return (
         <header className={cn('border border-b-gray-100', className)}>
             <Container className={cn('flex items-center gap-3 py-8 px-6')}>
@@ -22,12 +23,12 @@ export const Header: React.FC<PropsType> = ({ className }) => {
                     <h1 className={'text-2xl uppercase font-black'}>PizzaHut</h1>
                     <p className={'text-sm text-gray-400 leading-3'}>Order your favourite pizza</p>
                 </div>
-                <SearchInput className={'flex-1 mx-3'} />
+                {hasSearch && <SearchInput className={'flex-1 mx-3'} />}
                 <Button variant={'outline'} className={'flex items-center gap-1'}>
                     <User size={16} />
                     Sign In
                 </Button>
-                <CartButton />
+                {hasCart && <CartButton />}
             </Container>
 
 

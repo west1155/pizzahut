@@ -116,10 +116,12 @@ export const CartDrawer: React.FC<Props> = ({ children }) => {
                                     <span className="text-gray-400 text-lg">Total</span>
                                     <span className="text-xl font-bold">{totalAmount.toFixed(1)} £</span>
                                 </div>
-                                <Button className="w-full h-14 rounded-2xl text-base font-bold bg-orange-500 hover:bg-orange-600">
-                                    Proceed to checkout
-                                    <ArrowRight className="ml-2 w-5 h-5" />
-                                </Button>
+                                <a href="/checkout">
+                                    <Button className="w-full h-14 rounded-2xl text-base font-bold bg-orange-500 hover:bg-orange-600">
+                                        Proceed to checkout
+                                        <ArrowRight className="ml-2 w-5 h-5" />
+                                    </Button>
+                                </a>
                             </div>
                         )}
                     </div>

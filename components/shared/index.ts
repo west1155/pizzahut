@@ -9,3 +9,8 @@ export * from "./checkbox-filter-group";
 export * from "./filter-checkbox";
 export * from "./product-card";
 export * from "./products-list-group";
+export * from "./white-block";
+export * from "./checkout-item";
+export * from "./checkout-summary";
+export * from "./checkout-personal-form";
+export * from "./checkout-address-form";

@@ -67,8 +67,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         const { id: itemId } = await params;
         const id = Number(itemId);
         const data = (await req.json()) as {
-            productItemId: number;
-            ingredients: number[];
+            productItemId?: number;
+            ingredients?: number[];
+            quantity?: number;
         };
 
         if (!id) {
@@ -86,10 +87,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         await prisma.cartItem.update({
             where: { id },
             data: {
-                productItemId: data.productItemId,
-                ingredients: {
-                    set: data.ingredients?.map((id) => ({ id })) || [],
-                },
+                ...(data.productItemId && { productItemId: data.productItemId }),
+                ...(data.quantity && { quantity: data.quantity }),
+                ...(data.ingredients && {
+                    ingredients: {
+                        set: data.ingredients.map((id) => ({ id })),
+                    },
+                }),
             },
         });
 
