@@ -11,8 +11,10 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { checkoutFormSchema, CheckoutFormValues } from '@/components/shared/checkout/checkout-form-schema';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export default function CheckoutPage() {
+    const router = useRouter();
     const [submitting, setSubmitting] = React.useState(false);
     const [items, totalAmount, updateCartItem, removeCartItem, loading] = useCartStore(
         useShallow((state) => [state.items, state.totalAmount, state.updateCartItem, state.removeCartItem, state.loading])
@@ -47,7 +49,7 @@ export default function CheckoutPage() {
             }
 
             toast.success('Order placed successfully! 🍕');
-            // Redirect or clear cart here if needed
+            router.push('/checkout/success');
         } catch (err) {
             console.error(err);
             toast.error('Could not place order');
