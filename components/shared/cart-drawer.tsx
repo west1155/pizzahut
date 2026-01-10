@@ -4,7 +4,7 @@ import React from 'react';
 import { Drawer } from 'vaul';
 import { Button } from '@/components/ui';
 import { Title } from '@/components/shared/title';
-import { ShoppingCart, ArrowRight, X, Loader2 } from 'lucide-react';
+import { ShoppingCart, ArrowRight, X, Loader2, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { useCartStore, CartItemDTO } from '../store/cart';
@@ -99,7 +99,13 @@ export const CartDrawer: React.FC<Props> = ({ children }) => {
                             ) : (
                                 <div className="flex flex-col items-center justify-center h-full text-center py-10">
                                     <ShoppingCart size={48} className="text-gray-200 mb-4" />
-                                    <p className="text-gray-400">Your cart is empty</p>
+                                    <p className="text-gray-400 mb-5 text-lg font-medium">Your cart is empty</p>
+                                    <Drawer.Close asChild>
+                                        <Button className="w-56 h-12 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white rounded-xl">
+                                            <ArrowLeft className="mr-2 w-5 h-5" />
+                                            Go back
+                                        </Button>
+                                    </Drawer.Close>
                                 </div>
                             )}
                         </div>
