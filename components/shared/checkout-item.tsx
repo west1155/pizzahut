@@ -38,6 +38,7 @@ export const CheckoutItem: React.FC<Props> = ({
 
                 <div className="flex items-center gap-3">
                     <button
+                        type="button"
                         onClick={() => onClickCountButton?.('minus')}
                         disabled={quantity === 1}
                         className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50"
@@ -46,6 +47,7 @@ export const CheckoutItem: React.FC<Props> = ({
                     </button>
                     <span className="font-bold text-lg">{quantity}</span>
                     <button
+                        type="button"
                         onClick={() => onClickCountButton?.('plus')}
                         className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
                     >
@@ -54,6 +56,7 @@ export const CheckoutItem: React.FC<Props> = ({
                 </div>
 
                 <button
+                    type="button"
                     onClick={onClickRemove}
                     className="text-gray-300 hover:text-gray-400 transition-colors"
                 >

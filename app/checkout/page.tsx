@@ -83,18 +83,23 @@ export default function CheckoutPage() {
                                     }
                                 >
                                     <div className="flex flex-col gap-5">
-                                        {items.map((item) => (
-                                            <CheckoutItem
-                                                key={item.id}
-                                                imageUrl={item.productItem.product.imageUrl}
-                                                details={item.productItem.size ? `${item.productItem.size} cm, ${item.productItem.pizzaType === 1 ? 'traditional' : 'thin'} dough` : ''}
-                                                name={item.productItem.product.name}
-                                                price={item.productItem.price + item.ingredients.reduce((acc, ing) => acc + ing.price, 0)}
-                                                quantity={item.quantity}
-                                                onClickCountButton={(type: 'plus' | 'minus') => onClickCountButton(item.id, item.quantity, type)}
-                                                onClickRemove={() => removeCartItem(item.id)}
-                                            />
-                                        ))}
+                                        {items.map((item) => {
+                                            const unitPrice = item.productItem.price + item.ingredients.reduce((acc, ing) => acc + ing.price, 0);
+                                            return (
+                                                <CheckoutItem
+                                                    key={item.id}
+                                                    imageUrl={item.productItem.product.imageUrl}
+                                                    details={item.productItem.size ? `${item.productItem.size} cm, ${item.productItem.pizzaType === 1 ? 'traditional' : 'thin'} dough` : ''}
+                                                    name={item.productItem.product.name}
+                                                    price={unitPrice * item.quantity}
+                                                    quantity={item.quantity}
+                                                    onClickCountButton={(type: 'plus' | 'minus') => onClickCountButton(item.id, item.quantity, type)}
+                                                    onClickRemove={() => {
+                                                        removeCartItem(item.id);
+                                                    }}
+                                                />
+                                            );
+                                        })}
                                     </div>
                                 </WhiteBlock>
 
