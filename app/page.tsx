@@ -8,8 +8,8 @@ import { ProductsListGroup } from "@/components/shared";
 import ScrollToTopButton from "@/components/ui/scroll_up_button";
 import { prisma } from "@/prisma/prisma-client";
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ priceFrom?: string, priceTo?: string, ingredients?: string, pizzaTypes?: string, sizes?: string }> }) {
-    const { priceFrom, priceTo, ingredients: selectedIngredients, pizzaTypes, sizes } = await searchParams;
+export default async function Home({ searchParams }: { searchParams: Promise<{ priceFrom?: string, priceTo?: string, ingredients?: string, pizzaTypes?: string, sizes?: string, sortBy?: string }> }) {
+    const { priceFrom, priceTo, ingredients: selectedIngredients, pizzaTypes, sizes, sortBy } = await searchParams;
 
     const categories = await prisma.category.findMany({
         include: {
@@ -46,10 +46,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                 include: {
                     items: true,
                     ingredients: true,
-                }
+                },
             }
         }
-    })
+    });
+
+    // Manual sorting because Prisma doesn't support complex sorting on nested relations easily
+    const sortedCategories = categories.map((category) => ({
+        ...category,
+        products: [...category.products].sort((a, b) => {
+            if (sortBy === 'price_asc') {
+                return (a.items[0]?.price || 0) - (b.items[0]?.price || 0);
+            }
+            // price_desc is now the default
+            return (b.items[0]?.price || 0) - (a.items[0]?.price || 0);
+        }),
+    }));
 
     return <>
         <ScrollToTopButton />
@@ -57,7 +69,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
             <Title size="lg" text="Menu:" className='font-bold' />
 
         </Container>
-        <TopBar categories={categories.filter((category) => category.products.length > 0)} className="mx-6 pb-6" />
+        <TopBar categories={sortedCategories.filter((category) => category.products.length > 0)} className="mx-6 pb-6" />
         <Container className="flex pb-6">
             <div className="w-62.5">
                 <Suspense fallback={<div>Loading...</div>}>
@@ -65,7 +77,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                 </Suspense>
             </div>
             <div className="flex-1 ml-10 mt-6">
-                {categories.length > 0 && categories
+                {sortedCategories.length > 0 && sortedCategories
                     .filter((category) => category.products.length > 0)
                     .map((category) => (
                         <ProductsListGroup
