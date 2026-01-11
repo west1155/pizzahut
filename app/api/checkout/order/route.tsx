@@ -42,6 +42,41 @@ export async function POST(req: NextRequest) {
             console.error('[ORDER_EMAIL_ERROR] Catch block:', emailError);
         }
 
+        // Send Telegram notification
+        const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
+        const telegramChatId = process.env.TELEGRAM_CHAT_ID;
+
+        if (telegramToken && telegramChatId) {
+            try {
+                const message = `
+<b>🔔 New Order #${orderId}</b>
+
+<b>👤 Customer:</b> ${firstName} ${lastName}
+<b>📧 Email:</b> ${email}
+<b>📞 Phone:</b> ${phone}
+<b>🏠 Address:</b> ${address}
+${comment ? `<b>💬 Comment:</b> ${comment}` : ''}
+
+<b>🍕 Items:</b>
+${items.map((item: any) => `- ${item.productItem.product.name} (${item.quantity}x)`).join('\n')}
+
+<b>💰 Total Amount:</b> ${totalAmount} £
+                `;
+
+                await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: telegramChatId,
+                        text: message,
+                        parse_mode: 'HTML',
+                    }),
+                });
+            } catch (telegramError) {
+                console.error('[ORDER_TELEGRAM_ERROR]', telegramError);
+            }
+        }
+
         return NextResponse.json({ success: true, orderId });
     } catch (error) {
         console.error('[ORDER_POST] Server error', error);
