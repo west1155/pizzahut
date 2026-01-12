@@ -14,3 +14,7 @@ export * from "./checkout-item";
 export * from "./checkout-summary";
 export * from "./checkout-personal-form";
 export * from "./checkout-address-form";
+export * from "./modals/auth-modal";
+export * from "./forms/login-form";
+export * from "./forms/register-form";
+export * from "./providers";
