@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { Title } from '../title';
 import { FormInput } from '../form-input';
 import { Button } from '@/components/ui';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 
 const registerSchema = z.object({
@@ -39,17 +41,25 @@ export const RegisterForm: React.FC<Props> = ({ onSuccess, onSwitchToLogin }) =>
 
     const onSubmit = async (data: FormValues) => {
         try {
-            // In a real app, you would call a server action or API to register the user
-            console.log('Registering user:', data);
+            const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
 
-            // Artificial delay
-            await new Promise(r => setTimeout(r, 1000));
+            // Update profile with full name
+            await updateProfile(userCredential.user, {
+                displayName: data.fullName,
+            });
 
-            toast.success('Registration successful! Please log in.', { icon: '✅' });
+            // Send email verification
+            await sendEmailVerification(userCredential.user);
+
+            toast.success('Registration successful! A verification email has been sent.', { icon: '✅' });
             onSwitchToLogin?.();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error [REGISTER]', error);
-            toast.error('Registration failed. Please try again.');
+            let message = 'Registration failed. Please try again.';
+            if (error.code === 'auth/email-already-in-use') {
+                message = 'This email is already in use';
+            }
+            toast.error(message);
         }
     };
 
