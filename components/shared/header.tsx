@@ -9,9 +9,10 @@ import { Button } from "../ui/button";
 import { SearchInput } from "./search-bar";
 import { CartButton } from "./cartButton";
 import { AuthModal } from "./modals/auth-modal";
-import { useAuth } from "./auth-provider";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { useSession, signOut } from "next-auth/react";
+
+import { useAuthModal } from "../store/auth-modal";
+import { useCartStore } from "../store/cart";
 
 interface Props {
     hasSearch?: boolean;
@@ -20,15 +21,15 @@ interface Props {
 }
 
 export const Header: React.FC<Props> = ({ className, hasSearch = true, hasCart = true }) => {
-    const [openAuthModal, setOpenAuthModal] = React.useState(false);
-    const { user, loading } = useAuth();
+    const { isOpen, onOpen, onClose } = useAuthModal();
+    const clearCart = useCartStore((state) => state.clearCart);
+    const { data: session, status } = useSession();
+    const loading = status === "loading";
+    const user = session?.user;
 
     const onLogout = async () => {
-        try {
-            await signOut(auth);
-        } catch (error) {
-            console.error('Logout error', error);
-        }
+        await signOut();
+        clearCart();
     };
 
     return (
@@ -42,11 +43,11 @@ export const Header: React.FC<Props> = ({ className, hasSearch = true, hasCart =
                 {hasSearch && <SearchInput className={'flex-1 mx-3'} />}
 
                 <div className="flex items-center gap-3">
-                    <AuthModal open={openAuthModal} onClose={() => setOpenAuthModal(false)} />
+                    <AuthModal open={isOpen} onClose={onClose} />
 
                     {!user ? (
                         <Button
-                            onClick={() => setOpenAuthModal(true)}
+                            onClick={onOpen}
                             variant={'outline'}
                             className={'flex items-center gap-1'}
                             loading={loading}
@@ -58,7 +59,7 @@ export const Header: React.FC<Props> = ({ className, hasSearch = true, hasCart =
                         <div className="flex items-center gap-3">
                             <Button variant="ghost" className="flex items-center gap-2">
                                 <User size={16} />
-                                {user.displayName || user.email?.split('@')[0]}
+                                {user.name || user.email?.split('@')[0]}
                             </Button>
                             <Button variant="outline" size="icon" onClick={onLogout}>
                                 <LogOut size={16} />

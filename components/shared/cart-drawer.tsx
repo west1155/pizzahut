@@ -10,20 +10,34 @@ import Image from 'next/image';
 import { useCartStore, CartItemDTO } from '../store/cart';
 import { useShallow } from 'zustand/react/shallow';
 import { ChooseProductModal } from './modals/choose-product-modal';
-import { useSet } from 'react-use';
+import { useSession } from 'next-auth/react';
+import { useAuthModal } from '../store/auth-modal';
+import toast from 'react-hot-toast';
 
 interface Props {
     children: React.ReactNode;
     className?: string;
 }
 
-
 export const CartDrawer: React.FC<Props> = ({ children }) => {
+    const { data: session } = useSession();
+    const { onOpen } = useAuthModal();
     const [items, totalAmount, removeCartItem, updateCartItem, loading] = useCartStore(
         useShallow((state) => [state.items, state.totalAmount, state.removeCartItem, state.updateCartItem, state.loading])
     );
 
     const [editingItem, setEditingItem] = React.useState<CartItemDTO | null>(null);
+
+    const onCheckoutClick = () => {
+        if (!session) {
+            onOpen();
+            toast.error('Please login to checkout', { icon: '🔑' });
+            return;
+        }
+
+        window.location.href = '/checkout';
+    };
+
     return (
         <Drawer.Root direction="right">
             <Drawer.Trigger asChild>
@@ -116,12 +130,13 @@ export const CartDrawer: React.FC<Props> = ({ children }) => {
                                     <span className="text-gray-400 text-lg">Total</span>
                                     <span className="text-xl font-bold">{totalAmount.toFixed(1)} £</span>
                                 </div>
-                                <a href="/checkout">
-                                    <Button className="w-full h-14 rounded-2xl text-base font-bold bg-orange-500 hover:bg-orange-600">
-                                        Proceed to checkout
-                                        <ArrowRight className="ml-2 w-5 h-5" />
-                                    </Button>
-                                </a>
+                                <Button
+                                    onClick={onCheckoutClick}
+                                    className="w-full h-14 rounded-2xl text-base font-bold bg-orange-500 hover:bg-orange-600"
+                                >
+                                    Proceed to checkout
+                                    <ArrowRight className="ml-2 w-5 h-5" />
+                                </Button>
                             </div>
                         )}
                     </div>

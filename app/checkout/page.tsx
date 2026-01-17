@@ -12,9 +12,20 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { checkoutFormSchema, CheckoutFormValues } from '@/components/shared/checkout/checkout-form-schema';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useAuthModal } from '@/components/store/auth-modal';
 
 export default function CheckoutPage() {
     const router = useRouter();
+    const { data: session, status } = useSession();
+    const { onOpen } = useAuthModal();
+
+    React.useEffect(() => {
+        if (status === 'unauthenticated') {
+            onOpen();
+            router.push('/');
+        }
+    }, [status, router, onOpen]);
     const [submitting, setSubmitting] = React.useState(false);
     const [items, totalAmount, updateCartItem, removeCartItem, loading] = useCartStore(
         useShallow((state) => [state.items, state.totalAmount, state.updateCartItem, state.removeCartItem, state.loading])

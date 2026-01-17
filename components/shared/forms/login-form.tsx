@@ -7,8 +7,7 @@ import { z } from 'zod';
 import { Title } from '../title';
 import { FormInput } from '../form-input';
 import { Button } from '@/components/ui';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { signIn } from 'next-auth/react';
 import toast from 'react-hot-toast';
 
 const loginSchema = z.object({
@@ -19,12 +18,11 @@ const loginSchema = z.object({
 type FormValues = z.infer<typeof loginSchema>;
 
 interface Props {
-    onSuccess?: () => void;
+    onSuccess?: (name: string) => void;
     onSwitchToRegister?: () => void;
-    onSwitchToPhone?: () => void;
 }
 
-export const LoginForm: React.FC<Props> = ({ onSuccess, onSwitchToRegister, onSwitchToPhone }) => {
+export const LoginForm: React.FC<Props> = ({ onSuccess, onSwitchToRegister }) => {
     const form = useForm<FormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -35,25 +33,26 @@ export const LoginForm: React.FC<Props> = ({ onSuccess, onSwitchToRegister, onSw
 
     const onSubmit = async (data: FormValues) => {
         try {
-            await signInWithEmailAndPassword(auth, data.email, data.password);
+            const resp = await signIn('credentials', {
+                ...data,
+                redirect: false,
+            });
+
+            if (!resp?.ok) {
+                throw Error();
+            }
+
             toast.success('Successfully logged in!', { icon: '🔑' });
-            onSuccess?.();
+            onSuccess?.(data.email.split('@')[0]);
         } catch (error: any) {
             console.error('Error [LOGIN]', error);
-            let message = 'Could not log in. Please check your credentials.';
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                message = 'Invalid email or password';
-            }
-            toast.error(message);
+            toast.error('Invalid email or password');
         }
     };
 
     const onGoogleSignIn = async () => {
         try {
-            const provider = new GoogleAuthProvider();
-            await signInWithPopup(auth, provider);
-            toast.success('Successfully logged in with Google!', { icon: '🌐' });
-            onSuccess?.();
+            await signIn('google', { callbackUrl: '/', redirect: true });
         } catch (error) {
             console.error('Error [GOOGLE_LOGIN]', error);
             toast.error('Google sign-in failed');
@@ -88,14 +87,6 @@ export const LoginForm: React.FC<Props> = ({ onSuccess, onSwitchToRegister, onSw
                         Google
                     </Button>
 
-                    <Button
-                        variant="outline"
-                        onClick={onSwitchToPhone}
-                        type="button"
-                        className="h-12 w-full"
-                    >
-                        Login with Phone
-                    </Button>
                 </div>
 
                 <Button variant="ghost" onClick={onSwitchToRegister} type="button" className="h-12">

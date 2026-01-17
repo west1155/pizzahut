@@ -7,8 +7,6 @@ import { z } from 'zod';
 import { Title } from '../title';
 import { FormInput } from '../form-input';
 import { Button } from '@/components/ui';
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 
 const registerSchema = z.object({
@@ -24,7 +22,7 @@ const registerSchema = z.object({
 type FormValues = z.infer<typeof registerSchema>;
 
 interface Props {
-    onSuccess?: () => void;
+    onSuccess?: (name: string) => void;
     onSwitchToLogin?: () => void;
 }
 
@@ -41,25 +39,28 @@ export const RegisterForm: React.FC<Props> = ({ onSuccess, onSwitchToLogin }) =>
 
     const onSubmit = async (data: FormValues) => {
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-
-            // Update profile with full name
-            await updateProfile(userCredential.user, {
-                displayName: data.fullName,
+            const resp = await fetch('/api/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: data.email,
+                    fullName: data.fullName,
+                    password: data.password,
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             });
 
-            // Send email verification
-            await sendEmailVerification(userCredential.user);
+            if (!resp.ok) {
+                const errorData = await resp.json();
+                throw new Error(errorData.message || 'Registration failed');
+            }
 
-            toast.success('Registration successful! A verification email has been sent.', { icon: '✅' });
-            onSwitchToLogin?.();
+            toast.success('Registration successful!', { icon: '✅' });
+            onSuccess?.(data.fullName);
         } catch (error: any) {
             console.error('Error [REGISTER]', error);
-            let message = 'Registration failed. Please try again.';
-            if (error.code === 'auth/email-already-in-use') {
-                message = 'This email is already in use';
-            }
-            toast.error(message);
+            toast.error(error.message || 'Registration failed. Please try again.');
         }
     };
 

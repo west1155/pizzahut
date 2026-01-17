@@ -14,14 +14,19 @@ type PropsType = {
 import { useShallow } from 'zustand/react/shallow';
 import { CartDrawer } from "./cart-drawer";
 
+import { useSession } from "next-auth/react";
+
 export const CartButton: React.FC<PropsType> = ({ className }) => {
+    const { status } = useSession();
     const [totalAmount, items, loading, fetchCart] = useCartStore(
         useShallow((state) => [state.totalAmount, state.items, state.loading, state.fetchCart]),
     );
 
     React.useEffect(() => {
-        fetchCart();
-    }, [fetchCart]);
+        if (status === 'authenticated') {
+            fetchCart();
+        }
+    }, [fetchCart, status]);
 
     return (
         <CartDrawer>

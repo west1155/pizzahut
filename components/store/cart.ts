@@ -47,6 +47,7 @@ interface CartState {
     addCartItem: (values: any) => Promise<void>;
     removeCartItem: (id: number) => Promise<void>;
     updateCartItem: (id: number, values: { productItemId?: number; ingredients?: number[]; quantity?: number }) => Promise<void>;
+    clearCart: () => void;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -55,6 +56,8 @@ export const useCartStore = create<CartState>((set, get) => ({
     addingItem: false,
     error: false,
     totalAmount: 0,
+
+    clearCart: () => set({ items: [], totalAmount: 0 }),
 
     fetchCart: async () => {
         try {

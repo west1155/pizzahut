@@ -1,16 +1,19 @@
 import { prisma } from '@/prisma/prisma-client';
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 
 export async function GET(req: NextRequest) {
     try {
+        const session = await auth();
+        const userId = session?.user?.id ? Number(session.user.id) : null;
         const token = req.nextUrl.searchParams.get('token');
 
-        if (!token) {
+        if (!token && !userId) {
             return NextResponse.json({ items: [], totalAmount: 0 });
         }
 
-        const userCart = await prisma.cart.findFirst({
-            where: { tokenId: token },
+        let userCart = await prisma.cart.findFirst({
+            where: userId ? { userId } : { tokenId: token },
             include: {
                 items: {
                     orderBy: { createdAt: 'desc' },
@@ -31,6 +34,38 @@ export async function GET(req: NextRequest) {
             },
         });
 
+        // If user just logged in and has an anonymous cart, link it to the user
+        if (userId && token && !userCart) {
+            const anonymousCart = await prisma.cart.findFirst({
+                where: { tokenId: token },
+            });
+
+            if (anonymousCart) {
+                userCart = await prisma.cart.update({
+                    where: { id: anonymousCart.id },
+                    data: { userId },
+                    include: {
+                        items: {
+                            orderBy: { createdAt: 'desc' },
+                            include: {
+                                productItem: {
+                                    include: {
+                                        product: {
+                                            include: {
+                                                items: true,
+                                                ingredients: true,
+                                            }
+                                        }
+                                    }
+                                },
+                                ingredients: true,
+                            },
+                        },
+                    },
+                });
+            }
+        }
+
         return NextResponse.json(userCart || { items: [], totalAmount: 0 });
     } catch (error) {
         console.error('[CART_GET] Server error', error);
@@ -40,20 +75,25 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
+        const session = await auth();
+        const userId = session?.user?.id ? Number(session.user.id) : null;
         const data = await req.json();
         const { token, productItemId, ingredients, quantity = 1 } = data;
 
-        if (!token) {
-            return NextResponse.json({ message: 'Token is required' }, { status: 400 });
+        if (!token && !userId) {
+            return NextResponse.json({ message: 'Token or UserId is required' }, { status: 400 });
         }
 
         let userCart = await prisma.cart.findFirst({
-            where: { tokenId: token },
+            where: userId ? { userId } : { tokenId: token },
         });
 
         if (!userCart) {
             userCart = await prisma.cart.create({
-                data: { tokenId: token },
+                data: {
+                    userId: userId,
+                    tokenId: token,
+                },
             });
         }
 
@@ -116,7 +156,6 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        // Update totalAmount in background or here
         const totalAmount = updatedCart?.items.reduce((acc, item) => {
             const ingredientsPrice = item.ingredients.reduce((sum, ing) => sum + ing.price, 0);
             return acc + (item.productItem.price + ingredientsPrice) * item.quantity;
