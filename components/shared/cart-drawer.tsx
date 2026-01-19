@@ -22,8 +22,15 @@ interface Props {
 export const CartDrawer: React.FC<Props> = ({ children }) => {
     const { data: session } = useSession();
     const { onOpen } = useAuthModal();
-    const [items, totalAmount, removeCartItem, updateCartItem, loading] = useCartStore(
-        useShallow((state) => [state.items, state.totalAmount, state.removeCartItem, state.updateCartItem, state.loading])
+    const [items, totalAmount, removeCartItem, updateCartItem, loading, addingItem] = useCartStore(
+        useShallow((state) => [
+            state.items,
+            state.totalAmount,
+            state.removeCartItem,
+            state.updateCartItem,
+            state.loading,
+            state.addingItem
+        ])
     );
 
     const [editingItem, setEditingItem] = React.useState<CartItemDTO | null>(null);
@@ -59,7 +66,7 @@ export const CartDrawer: React.FC<Props> = ({ children }) => {
                         </Drawer.Title>
 
                         <div className="relative flex-1 overflow-auto -mx-3 px-3">
-                            {loading && (
+                            {(loading || addingItem) && (
                                 <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
                                     <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
                                 </div>

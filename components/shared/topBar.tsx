@@ -12,7 +12,7 @@ type PropsType = {
 }
 export const TopBar: React.FC<PropsType> = ({ categories, className }) => {
     return (
-        <div className={cn('mt-5 sticky top-0 bg-white shadow-lg shadow-black/5 z-10', className)}>
+        <div className={cn('sticky top-0 bg-white/70 backdrop-blur-md py-5 shadow-lg shadow-black/5 z-10', className)}>
             <Container className="flex items-center justify-between">
                 <Categories items={categories} className={'font-light rounded-2xl'} />
                 <SortPopup />

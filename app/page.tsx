@@ -69,7 +69,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
             <Title size="lg" text="Menu:" className='font-bold' />
 
         </Container>
-        <TopBar categories={sortedCategories.filter((category) => category.products.length > 0)} className="mx-6 pb-6" />
+        <TopBar categories={sortedCategories.filter((category) => category.products.length > 0)} />
         <Container className="flex pb-6">
             <div className="w-62.5">
                 <Suspense fallback={<div>Loading...</div>}>

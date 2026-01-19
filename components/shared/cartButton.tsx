@@ -15,28 +15,41 @@ import { useShallow } from 'zustand/react/shallow';
 import { CartDrawer } from "./cart-drawer";
 
 import { useSession } from "next-auth/react";
+import { removeCartToken } from "@/lib/get-cart-token";
 
 export const CartButton: React.FC<PropsType> = ({ className }) => {
     const { status } = useSession();
-    const [totalAmount, items, loading, fetchCart] = useCartStore(
-        useShallow((state) => [state.totalAmount, state.items, state.loading, state.fetchCart]),
+    const [totalAmount, items, loading, addingItem, fetchCart, clearCart] = useCartStore(
+        useShallow((state) => [
+            state.totalAmount,
+            state.items,
+            state.loading,
+            state.addingItem,
+            state.fetchCart,
+            state.clearCart
+        ]),
     );
 
     React.useEffect(() => {
         if (status === 'authenticated') {
             fetchCart();
+        } else if (status === 'unauthenticated') {
+            removeCartToken();
+            clearCart();
         }
-    }, [fetchCart, status]);
+    }, [fetchCart, clearCart, status]);
+
+    const isUpdating = loading || addingItem;
 
     return (
         <CartDrawer>
             <Button
-                disabled={loading}
-                className={cn('relative group min-w-[100px]', className, loading && 'opacity-70')}>
+                disabled={isUpdating}
+                className={cn('relative group min-w-[100px]', className, isUpdating && 'opacity-70')}>
                 <b>{totalAmount} £</b>
                 <span className="h-full w-px bg-white/30 mx-3" />
-                <div className={cn("flex items-center gap-1 transition duration-300", !loading && "group-hover:opacity-0")}>
-                    {loading ? <Loader className="h-4 w-4 animate-spin" /> : (
+                <div className={cn("flex items-center gap-1 transition duration-300", !isUpdating && "group-hover:opacity-0")}>
+                    {isUpdating ? <Loader className="h-4 w-4 animate-spin" /> : (
                         <div className="flex items-center gap-1">
                             <ShoppingCart className="h-4 w-4 relative" strokeWidth={2} />
                             <b>{items.length}</b>

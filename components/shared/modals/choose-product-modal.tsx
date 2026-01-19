@@ -102,13 +102,13 @@ export const ChooseProductModal: React.FC<Props> = ({
 
             if (productItemId) {
                 if (onUpdate) {
-                    await onUpdate({
+                    onUpdate({
                         productItemId,
                         ingredients: Array.from(selectedIngredients),
                     });
                     toast.success('Product updated successfully!');
                 } else {
-                    await addCartItem({
+                    addCartItem({
                         productItemId,
                         ingredients: Array.from(selectedIngredients),
                     });

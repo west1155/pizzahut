@@ -19,3 +19,7 @@ export const getCartToken = (): string => {
 
     return token;
 };
+
+export const removeCartToken = (): void => {
+    Cookies.remove('cartToken');
+};

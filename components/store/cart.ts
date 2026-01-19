@@ -117,8 +117,22 @@ export const useCartStore = create<CartState>((set, get) => ({
     },
 
     removeCartItem: async (id: number) => {
+        const prevItems = get().items;
+        const prevTotal = get().totalAmount;
+
         try {
-            set({ loading: true, error: false });
+            set({ error: false });
+
+            // Optimistic update
+            const removedItem = prevItems.find(item => item.id === id);
+            if (removedItem) {
+                const itemPrice = removedItem.productItem.price + (removedItem.ingredients?.reduce((acc, ing) => acc + ing.price, 0) || 0);
+                set({
+                    items: prevItems.filter(item => item.id !== id),
+                    totalAmount: prevTotal - (itemPrice * removedItem.quantity)
+                });
+            }
+
             const response = await fetch(`/api/cart-items/${id}`, {
                 method: 'DELETE',
             });
@@ -132,17 +146,36 @@ export const useCartStore = create<CartState>((set, get) => ({
             set({
                 items: data.items || [],
                 totalAmount: data.totalAmount || 0,
-                loading: false
             });
         } catch (error) {
             console.error('[REMOVE_CART_ITEM] Error:', error);
-            set({ error: true, loading: false });
+            // Rollback on error
+            set({ items: prevItems, totalAmount: prevTotal, error: true });
         }
     },
 
     updateCartItem: async (id: number, values: { productItemId?: number; ingredients?: number[]; quantity?: number }) => {
+        const prevItems = get().items;
+        const prevTotal = get().totalAmount;
+
         try {
-            set({ loading: true, error: false });
+            set({ error: false });
+
+            // Optimistic update
+            const updatedItems = prevItems.map(item => {
+                if (item.id === id) {
+                    return { ...item, quantity: values.quantity ?? item.quantity };
+                }
+                return item;
+            });
+
+            const newTotal = updatedItems.reduce((acc, item) => {
+                const ingredientsPrice = item.ingredients.reduce((sum, ing) => sum + ing.price, 0);
+                return acc + (item.productItem.price + ingredientsPrice) * item.quantity;
+            }, 0);
+
+            set({ items: updatedItems, totalAmount: newTotal });
+
             const response = await fetch(`/api/cart-items/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -158,11 +191,11 @@ export const useCartStore = create<CartState>((set, get) => ({
             set({
                 items: data.items || [],
                 totalAmount: data.totalAmount || 0,
-                loading: false
             });
         } catch (error) {
             console.error('[UPDATE_CART_ITEM] Error:', error);
-            set({ error: true, loading: false });
+            // Rollback on error
+            set({ items: prevItems, totalAmount: prevTotal, error: true });
         }
     },
 }));
