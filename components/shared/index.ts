@@ -19,3 +19,4 @@ export * from "./modals/pizza-options-modal";
 export * from "./forms/login-form";
 export * from "./forms/register-form";
 export * from "./providers";
+export * from "./delivery-info";
