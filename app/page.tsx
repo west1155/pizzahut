@@ -2,9 +2,7 @@ import React, { Suspense } from "react";
 
 import { Title } from "@/components/shared/title";
 import { Container } from "@/components/shared/container";
-import { TopBar } from "@/components/shared/topBar";
-import { Filters } from "@/components/shared/filters";
-import { ProductsListGroup } from "@/components/shared";
+import { ProductsListGroup, PizzaOptionsModal, TopBar, Categories } from "@/components/shared";
 import ScrollToTopButton from "@/components/ui/scroll_up_button";
 import { prisma } from "@/prisma/prisma-client";
 
@@ -70,13 +68,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
 
         </Container>
         <TopBar categories={sortedCategories.filter((category) => category.products.length > 0)} />
-        <Container className="flex pb-6">
-            <div className="w-62.5">
-                <Suspense fallback={<div>Loading...</div>}>
-                    <Filters />
-                </Suspense>
-            </div>
-            <div className="flex-1 ml-10 mt-6">
+        <Container className="pb-14 mt-10">
+            <div className="flex flex-col gap-16">
                 {sortedCategories.length > 0 && sortedCategories
                     .filter((category) => category.products.length > 0)
                     .map((category) => (
@@ -96,7 +89,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                         />
                     ))}
             </div>
-
         </Container>
     </>
 }

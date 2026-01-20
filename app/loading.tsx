@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export default function Loading() {
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white">
             <div className="relative flex flex-col items-center">
                 <div className="relative h-32 w-32 animate-pulse transition-all duration-1000">
                     <Image

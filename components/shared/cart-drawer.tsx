@@ -67,7 +67,7 @@ export const CartDrawer: React.FC<Props> = ({ children }) => {
 
                         <div className="relative flex-1 overflow-auto -mx-3 px-3">
                             {(loading || addingItem) && (
-                                <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
+                                <div className="absolute inset-0 bg-white z-10 flex items-center justify-center">
                                     <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
                                 </div>
                             )}

@@ -66,11 +66,6 @@ export const Filters: React.FC<PropsType> = ({ className }) => {
     };
 
     return <div className={className}>
-        <Title
-            text="Filters :"
-            size="sm"
-            className="mb-5 font-bold pt-6 pb-10 border-b border-b-neutral-100"
-        />
         <CheckboxFilterGroup
             name="pizzaTypes"
             className="mb-5"
