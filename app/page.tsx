@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 
 import { Title } from "@/components/shared/title";
 import { Container } from "@/components/shared/container";
-import { ProductsListGroup, PizzaOptionsModal, TopBar, Categories, DeliveryInfo } from "@/components/shared";
+import { ProductsListGroup, PizzaOptionsModal, TopBar, Categories, DeliveryInfo, MysteryShopperBanner } from "@/components/shared";
 import ScrollToTopButton from "@/components/ui/scroll_up_button";
 import { prisma } from "@/prisma/prisma-client";
 
@@ -91,5 +91,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
             </div>
         </Container>
         <DeliveryInfo />
+        <MysteryShopperBanner />
     </>
 }

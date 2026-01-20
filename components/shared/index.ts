@@ -20,3 +20,4 @@ export * from "./forms/login-form";
 export * from "./forms/register-form";
 export * from "./providers";
 export * from "./delivery-info";
+export * from "./mystery-shopper-banner";
